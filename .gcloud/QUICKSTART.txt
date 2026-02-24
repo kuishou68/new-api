@@ -1,0 +1,229 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                 🚀 NEW-API GOOGLE CLOUD DEPLOYMENT GUIDE                    ║
+║                                                                              ║
+║                         Quick Start (5 Steps, ~25 min)                       ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 YOUR GCP SETUP:
+
+   Project ID .......... acoustic-shade-480602-u0
+   Email ............... lijianlin6868@gmail.com
+   Region .............. asia-east1 (台湾)
+   Service ............. Google Cloud Run
+   Database ............ Cloud SQL MySQL (optional)
+   Cache ............... Cloud Memorystore Redis (optional)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ PRE-FLIGHT CHECKLIST:
+
+   [ ] Docker Desktop is installed
+   [ ] gcloud CLI is installed
+   [ ] Logged into gcloud: gcloud auth list
+   [ ] Project set: gcloud config get-value project
+   [ ] Git repository is clean: git status
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 THREE DEPLOYMENT OPTIONS:
+
+   OPTION 1: ⚡ QUICK DEPLOY (Easiest, Recommended for First Time)
+   ─────────────────────────────────────────────────────────────
+
+   1. Start Docker Desktop:
+      $ open /Applications/Docker.app
+
+   2. Run deployment script:
+      $ cd /Users/pojian/code/github/new-api
+      $ ./.gcloud/quick-deploy.sh
+
+   ✓ This will build, push, and deploy automatically
+   ✓ Time: ~20-25 minutes
+   ✓ Best for: Testing and quick deployment
+
+   ---
+
+   OPTION 2: 📖 DETAILED MANUAL (Best for Production)
+   ────────────────────────────────────────────────
+
+   1. Read detailed guide:
+      $ cat .gcloud/DEPLOYMENT_GUIDE.md
+
+   2. Follow step-by-step instructions
+   3. Includes Cloud SQL MySQL and Redis setup
+
+   ✓ Full control and customization
+   ✓ Recommended for production
+   ✓ Includes database and cache setup
+
+   ---
+
+   OPTION 3: 🔨 CI/CD WITH CLOUD BUILD (Advanced)
+   ──────────────────────────────────────────────
+
+   1. Push to GitHub/Cloud Source Repository
+   2. Trigger Cloud Build:
+      $ gcloud builds submit --config=.gcloud/cloudbuild.yaml
+
+   ✓ Automated deployment on code push
+   ✓ Suitable for teams
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 RECOMMENDED: QUICK DEPLOY (Option 1)
+
+STEP 1: Prepare Environment
+────────────────────────────
+   a. Start Docker:
+      $ open /Applications/Docker.app
+
+      Wait 1-2 minutes for Docker to start completely
+
+   b. Verify Docker is running:
+      $ docker ps
+
+      (Should show no errors)
+
+
+STEP 2: Execute Deployment
+──────────────────────────
+   $ cd /Users/pojian/code/github/new-api
+   $ ./.gcloud/quick-deploy.sh
+
+   The script will:
+   1. ✓ Build Docker image (~10-15 minutes - takes time!)
+   2. ✓ Configure Docker authentication
+   3. ✓ Push image to Google Container Registry
+   4. ✓ Enable necessary APIs
+   5. ✓ Deploy to Cloud Run
+   6. ✓ Show you the service URL
+
+
+STEP 3: Wait for Deployment
+──────────────────────────
+   - Monitor the script output
+   - This takes 15-25 minutes total (mostly building Docker image)
+   - Don't interrupt the process
+
+
+STEP 4: Get Service URL
+──────────────────────
+   After deployment completes, you'll see:
+
+   ✅ Deployment Successful!
+
+   📊 Service Information:
+      Service URL: https://new-api-xxxxx.run.app ← USE THIS!
+      Project ID: acoustic-shade-480602-u0
+      ...
+
+
+STEP 5: Access Your Application
+───────────────────────────────
+   1. Open browser: https://new-api-xxxxx.run.app
+   2. Login: admin / 123456
+   3. IMPORTANT: Change password immediately!
+   4. Configure API providers
+   5. Set up payment methods
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ IMPORTANT NOTES:
+
+   1. DOCKER MUST BE RUNNING
+      If deployment fails, first check: docker ps
+
+   2. BUILD TIME IS LONG
+      Docker image build takes 10-15 minutes
+      Don't panic if it seems slow!
+
+   3. FIRST DEPLOYMENT SLOWER
+      Initial setup creates Cloud Run service
+      Subsequent deployments are faster
+
+   4. DEFAULT PASSWORD
+      Username: admin
+      Password: 123456
+      ⚠️ Change immediately after login!
+
+   5. NO CUSTOM DOMAIN YET
+      Using Google's default domain
+      Can add custom domain later
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🆘 TROUBLESHOOTING:
+
+   ❌ "Docker is not installed"
+   ✓ Install: https://www.docker.com/products/docker-desktop
+
+   ❌ "Cannot connect to Docker daemon"
+   ✓ Start Docker Desktop: open /Applications/Docker.app
+
+   ❌ "Permission denied" errors
+   ✓ Run: gcloud auth configure-docker
+
+   ❌ Build takes very long / hangs
+   ✓ This is normal! Docker image is large (~800MB)
+   ✓ Check your internet connection
+
+   ❌ "Error creating service"
+   ✓ Check: gcloud run services list
+   ✓ See logs: gcloud run services logs read new-api --limit=100
+
+   ❌ Service returns 500 error
+   ✓ Check database connection
+   ✓ See logs: gcloud run services logs read new-api --follow
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 FILES IN THIS DIRECTORY:
+
+   README.md .................. Full overview and options
+   DEPLOYMENT_GUIDE.md ........ Detailed step-by-step guide
+   QUICKSTART.txt ............. This file (quick reference)
+   quick-deploy.sh ............ Automated deployment script
+   cloudbuild.yaml ............ CI/CD configuration
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💾 AFTER DEPLOYMENT:
+
+   Save These:
+   1. Service URL (shown after deployment)
+   2. Default credentials (admin / 123456)
+   3. Project ID (acoustic-shade-480602-u0)
+
+   Check These:
+   1. Application running: open https://your-service-url.run.app
+   2. Admin login works
+   3. Default password changed
+   4. API providers configured
+   5. Payment setup complete
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 LET'S START!
+
+   Ready? Open a terminal and run:
+
+   $ cd /Users/pojian/code/github/new-api
+   $ open /Applications/Docker.app
+   $ ./.gcloud/quick-deploy.sh
+
+   Sit back and watch the magic happen! ✨
+   (Takes about 20-25 minutes)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 Need Help?
+
+   - GitHub: https://github.com/QuantumNous/new-api
+   - Docs: https://docs.newapi.pro
+   - FAQ: https://docs.newapi.pro/en/docs/support/faq
+
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    Good luck! 🎉 See you in 25 minutes!                     ║
+╚════════════════════════════════════════════════════════════════════════════╝

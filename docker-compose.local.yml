@@ -1,0 +1,23 @@
+# Local dev compose that avoids clashing with any existing `redis`/`mysql` containers.
+# Uses SQLite (default) for the app database.
+
+services:
+  new-api:
+    image: calciumion/new-api:latest
+    container_name: new-api-local
+    restart: unless-stopped
+    command: --log-dir /app/logs
+    ports:
+      - "${NEW_API_PORT:-3006}:3000"
+    volumes:
+      - ./data-local:/data
+      - ./logs-local:/app/logs
+    environment:
+      - TZ=Asia/Shanghai
+      - ERROR_LOG_ENABLED=true
+      - BATCH_UPDATE_ENABLED=true
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
