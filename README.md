@@ -2,7 +2,7 @@
 
 ![new-api](/web/public/logo.png)
 
-# New API
+# Cocoon API
 
 🍥 **Next-Generation LLM Gateway and AI Asset Management System**
 
@@ -465,7 +465,7 @@ If your organization's policies do not permit the use of AGPLv3-licensed softwar
 
 <div align="center">
 
-### 💖 Thank you for using New API
+### 💖 Thank you for using Cocoon API
 
 If this project is helpful to you, welcome to give us a ⭐️ Star！
 

@@ -2,7 +2,7 @@
 
 ![new-api](/web/public/logo.png)
 
-# New API
+# Cocoon API
 
 🍥 **新一代大模型网关与AI资产管理系统**
 
@@ -465,7 +465,7 @@ docker run --name new-api -d --restart always \
 
 <div align="center">
 
-### 💖 感谢使用 New API
+### 💖 感谢使用 Cocoon API
 
 如果这个项目对你有帮助，欢迎给我们一个 ⭐️ Star！
 
