@@ -10,7 +10,7 @@ import (
 )
 
 var defaultGroupRatio = map[string]float64{
-	"default": 1,
+	"default": 1.3,
 	"vip":     1,
 	"svip":    1,
 }

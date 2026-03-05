@@ -38,7 +38,13 @@ import {
   IconLock,
   IconDelete,
 } from '@douyinfe/semi-icons';
-import { SiTelegram, SiWechat, SiLinux, SiDiscord } from 'react-icons/si';
+import {
+  SiTelegram,
+  SiWechat,
+  SiLinux,
+  SiDiscord,
+  SiGoogle,
+} from 'react-icons/si';
 import { UserPlus, ShieldCheck } from 'lucide-react';
 import TelegramLoginButton from 'react-telegram-login';
 import {
@@ -46,6 +52,7 @@ import {
   showError,
   showSuccess,
   onGitHubOAuthClicked,
+  onGoogleOAuthClicked,
   onOIDCClicked,
   onLinuxDOOAuthClicked,
   onDiscordOAuthClicked,
@@ -112,7 +119,9 @@ const AccountManagement = ({
         showError(res.data.message || t('获取绑定信息失败'));
       }
     } catch (error) {
-      showError(error.response?.data?.message || error.message || t('获取绑定信息失败'));
+      showError(
+        error.response?.data?.message || error.message || t('获取绑定信息失败'),
+      );
     }
   };
 
@@ -126,7 +135,9 @@ const AccountManagement = ({
       onOk: async () => {
         setCustomOAuthLoading((prev) => ({ ...prev, [providerId]: true }));
         try {
-          const res = await API.delete(`/api/user/oauth/bindings/${providerId}`);
+          const res = await API.delete(
+            `/api/user/oauth/bindings/${providerId}`,
+          );
           if (res.data.success) {
             showSuccess(t('解绑成功'));
             await loadCustomOAuthBindings();
@@ -134,7 +145,9 @@ const AccountManagement = ({
             showError(res.data.message);
           }
         } catch (error) {
-          showError(error.response?.data?.message || error.message || t('操作失败'));
+          showError(
+            error.response?.data?.message || error.message || t('操作失败'),
+          );
         } finally {
           setCustomOAuthLoading((prev) => ({ ...prev, [providerId]: false }));
         }
@@ -150,13 +163,17 @@ const AccountManagement = ({
   // Check if custom OAuth provider is bound
   const isCustomOAuthBound = (providerId) => {
     const normalizedId = Number(providerId);
-    return customOAuthBindings.some((b) => Number(b.provider_id) === normalizedId);
+    return customOAuthBindings.some(
+      (b) => Number(b.provider_id) === normalizedId,
+    );
   };
 
   // Get binding info for a provider
   const getCustomOAuthBinding = (providerId) => {
     const normalizedId = Number(providerId);
-    return customOAuthBindings.find((b) => Number(b.provider_id) === normalizedId);
+    return customOAuthBindings.find(
+      (b) => Number(b.provider_id) === normalizedId,
+    );
   };
 
   React.useEffect(() => {
@@ -312,6 +329,47 @@ const AccountManagement = ({
                       }
                     >
                       {status.github_oauth ? t('绑定') : t('未启用')}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Google绑定 */}
+              <Card className='!rounded-xl'>
+                <div className='flex items-center justify-between gap-3'>
+                  <div className='flex items-center flex-1 min-w-0'>
+                    <div className='w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mr-3 flex-shrink-0'>
+                      <SiGoogle
+                        size={20}
+                        className='text-slate-600 dark:text-slate-300'
+                      />
+                    </div>
+                    <div className='flex-1 min-w-0'>
+                      <div className='font-medium text-gray-900'>
+                        {t('Google')}
+                      </div>
+                      <div className='text-sm text-gray-500 truncate'>
+                        {renderAccountInfo(
+                          userState.user?.google_id,
+                          t('Google ID'),
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className='flex-shrink-0'>
+                    <Button
+                      type='primary'
+                      theme='outline'
+                      size='small'
+                      onClick={() =>
+                        onGoogleOAuthClicked(status.google_client_id)
+                      }
+                      disabled={
+                        isBound(userState.user?.google_id) ||
+                        !status.google_oauth
+                      }
+                    >
+                      {status.google_oauth ? t('绑定') : t('未启用')}
                     </Button>
                   </div>
                 </div>
@@ -554,7 +612,10 @@ const AccountManagement = ({
                               size='small'
                               loading={customOAuthLoading[provider.id]}
                               onClick={() =>
-                                handleUnbindCustomOAuth(provider.id, provider.name)
+                                handleUnbindCustomOAuth(
+                                  provider.id,
+                                  provider.name,
+                                )
                               }
                             >
                               {t('解绑')}

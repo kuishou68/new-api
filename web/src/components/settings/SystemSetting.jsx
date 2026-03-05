@@ -53,6 +53,9 @@ const SystemSetting = () => {
     GitHubOAuthEnabled: '',
     GitHubClientId: '',
     GitHubClientSecret: '',
+    GoogleOAuthEnabled: '',
+    GoogleClientId: '',
+    GoogleClientSecret: '',
     'discord.enabled': '',
     'discord.client_id': '',
     'discord.client_secret': '',
@@ -175,6 +178,7 @@ const SystemSetting = () => {
           case 'PasswordRegisterEnabled':
           case 'EmailVerificationEnabled':
           case 'GitHubOAuthEnabled':
+          case 'GoogleOAuthEnabled':
           case 'WeChatAuthEnabled':
           case 'TelegramOAuthEnabled':
           case 'RegisterEnabled':
@@ -470,6 +474,27 @@ const SystemSetting = () => {
       options.push({
         key: 'GitHubClientSecret',
         value: inputs.GitHubClientSecret,
+      });
+    }
+
+    if (options.length > 0) {
+      await updateOptions(options);
+    }
+  };
+
+  const submitGoogleOAuth = async () => {
+    const options = [];
+
+    if (originInputs['GoogleClientId'] !== inputs.GoogleClientId) {
+      options.push({ key: 'GoogleClientId', value: inputs.GoogleClientId });
+    }
+    if (
+      originInputs['GoogleClientSecret'] !== inputs.GoogleClientSecret &&
+      inputs.GoogleClientSecret !== ''
+    ) {
+      options.push({
+        key: 'GoogleClientSecret',
+        value: inputs.GoogleClientSecret,
       });
     }
 
@@ -1045,6 +1070,15 @@ const SystemSetting = () => {
                         {t('允许通过 GitHub 账户登录 & 注册')}
                       </Form.Checkbox>
                       <Form.Checkbox
+                        field='GoogleOAuthEnabled'
+                        noLabel
+                        onChange={(e) =>
+                          handleCheckboxChange('GoogleOAuthEnabled', e)
+                        }
+                      >
+                        {t('允许通过 Google 账户登录 & 注册')}
+                      </Form.Checkbox>
+                      <Form.Checkbox
                         field='discord.enabled'
                         noLabel
                         onChange={(e) =>
@@ -1449,6 +1483,39 @@ const SystemSetting = () => {
                   </Button>
                 </Form.Section>
               </Card>
+
+              <Card>
+                <Form.Section text={t('配置 Google OAuth')}>
+                  <Text>{t('用以支持通过 Google 进行登录注册')}</Text>
+                  <Banner
+                    type='info'
+                    description={`${t('Authorization callback URL 填')} ${inputs.ServerAddress ? inputs.ServerAddress : t('网站地址')}/oauth/google`}
+                    style={{ marginBottom: 20, marginTop: 16 }}
+                  />
+                  <Row
+                    gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}
+                  >
+                    <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                      <Form.Input
+                        field='GoogleClientId'
+                        label={t('Google Client ID')}
+                      />
+                    </Col>
+                    <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                      <Form.Input
+                        field='GoogleClientSecret'
+                        label={t('Google Client Secret')}
+                        type='password'
+                        placeholder={t('敏感信息不会发送到前端显示')}
+                      />
+                    </Col>
+                  </Row>
+                  <Button onClick={submitGoogleOAuth}>
+                    {t('保存 Google OAuth 设置')}
+                  </Button>
+                </Form.Section>
+              </Card>
+
               <Card>
                 <Form.Section text={t('配置 Discord OAuth')}>
                   <Text>{t('用以支持通过 Discord 进行登录注册')}</Text>

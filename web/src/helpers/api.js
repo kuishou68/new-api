@@ -275,6 +275,15 @@ export async function onOIDCClicked(
   }
 }
 
+export async function onGoogleOAuthClicked(google_client_id, options = {}) {
+  const state = await prepareOAuthState(options);
+  if (!state) return;
+  const redirect_uri = `${window.location.origin}/oauth/google`;
+  window.open(
+    `https://accounts.google.com/o/oauth2/v2/auth?client_id=${google_client_id}&redirect_uri=${encodeURIComponent(redirect_uri)}&response_type=code&scope=${encodeURIComponent('openid email profile')}&state=${state}`,
+  );
+}
+
 export async function onGitHubOAuthClicked(github_client_id, options = {}) {
   const state = await prepareOAuthState(options);
   if (!state) return;
@@ -307,28 +316,38 @@ export async function onLinuxDOOAuthClicked(
 export async function onCustomOAuthClicked(provider, options = {}) {
   const state = await prepareOAuthState(options);
   if (!state) return;
-  
+
   try {
     const redirect_uri = `${window.location.origin}/oauth/${provider.slug}`;
-    
+
     // Check if authorization_endpoint is a full URL or relative path
     let authUrl;
-    if (provider.authorization_endpoint.startsWith('http://') || 
-        provider.authorization_endpoint.startsWith('https://')) {
+    if (
+      provider.authorization_endpoint.startsWith('http://') ||
+      provider.authorization_endpoint.startsWith('https://')
+    ) {
       authUrl = new URL(provider.authorization_endpoint);
     } else {
       // Relative path - this is a configuration error, show error message
-      console.error('Custom OAuth authorization_endpoint must be a full URL:', provider.authorization_endpoint);
-      showError('OAuth 配置错误：授权端点必须是完整的 URL（以 http:// 或 https:// 开头）');
+      console.error(
+        'Custom OAuth authorization_endpoint must be a full URL:',
+        provider.authorization_endpoint,
+      );
+      showError(
+        'OAuth 配置错误：授权端点必须是完整的 URL（以 http:// 或 https:// 开头）',
+      );
       return;
     }
-    
+
     authUrl.searchParams.set('client_id', provider.client_id);
     authUrl.searchParams.set('redirect_uri', redirect_uri);
     authUrl.searchParams.set('response_type', 'code');
-    authUrl.searchParams.set('scope', provider.scopes || 'openid profile email');
+    authUrl.searchParams.set(
+      'scope',
+      provider.scopes || 'openid profile email',
+    );
     authUrl.searchParams.set('state', state);
-    
+
     window.open(authUrl.toString());
   } catch (error) {
     console.error('Failed to initiate custom OAuth:', error);
