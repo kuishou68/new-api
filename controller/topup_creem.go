@@ -66,6 +66,10 @@ type CreemAdaptor struct {
 }
 
 func (*CreemAdaptor) RequestPay(c *gin.Context, req *CreemPayRequest) {
+	if !IsCreemTopupEnabled() {
+		c.JSON(200, gin.H{"message": "error", "data": "Creem 支付未启用"})
+		return
+	}
 	if req.PaymentMethod != PaymentMethodCreem {
 		c.JSON(200, gin.H{"message": "error", "data": "不支持的支付渠道"})
 		return
@@ -230,6 +234,10 @@ type CreemWebhookEvent struct {
 }
 
 func CreemWebhook(c *gin.Context) {
+	if !IsCreemWebhookEnabled() {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
 	// 读取body内容用于打印，同时保留原始数据供后续使用
 	bodyBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {

@@ -23,6 +23,10 @@ type SubscriptionEpayPayRequest struct {
 }
 
 func SubscriptionRequestEpay(c *gin.Context) {
+	if !IsEpayEnabled() {
+		common.ApiErrorMsg(c, "当前管理员未配置支付信息")
+		return
+	}
 	var req SubscriptionEpayPayRequest
 	if err := c.ShouldBindJSON(&req); err != nil || req.PlanId <= 0 {
 		common.ApiErrorMsg(c, "参数错误")
@@ -112,6 +116,10 @@ func SubscriptionRequestEpay(c *gin.Context) {
 }
 
 func SubscriptionEpayNotify(c *gin.Context) {
+	if !IsEpayEnabled() {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
 	var params map[string]string
 
 	if c.Request.Method == "POST" {
@@ -167,6 +175,10 @@ func SubscriptionEpayNotify(c *gin.Context) {
 // SubscriptionEpayReturn handles browser return after payment.
 // It verifies the payload and completes the order, then redirects to console.
 func SubscriptionEpayReturn(c *gin.Context) {
+	if !IsEpayEnabled() {
+		c.Redirect(http.StatusFound, system_setting.ServerAddress+"/console/topup?pay=fail")
+		return
+	}
 	var params map[string]string
 
 	if c.Request.Method == "POST" {

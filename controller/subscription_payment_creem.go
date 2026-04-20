@@ -19,6 +19,10 @@ type SubscriptionCreemPayRequest struct {
 }
 
 func SubscriptionRequestCreemPay(c *gin.Context) {
+	if !IsCreemTopupEnabled() {
+		common.ApiErrorMsg(c, "Creem 支付未启用")
+		return
+	}
 	var req SubscriptionCreemPayRequest
 
 	// Keep body for debugging consistency (like RequestCreemPay)

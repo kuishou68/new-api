@@ -64,15 +64,18 @@ func LogTaskConsumption(c *gin.Context, info *relaycommon.RelayInfo) {
 // 异步任务计费辅助函数
 // ---------------------------------------------------------------------------
 
-// resolveTokenKey 通过 TokenId 运行时获取令牌 Key（用于 Redis 缓存操作）。
-// 如果令牌已被删除或查询失败，返回空字符串。
-func resolveTokenKey(ctx context.Context, tokenId int, taskID string) string {
+// resolveTokenQuotaTarget 通过 TokenId 运行时获取令牌配额目标。
+// 如果令牌已被删除或查询失败，返回空 key；unlimited token 返回 skip=true。
+func resolveTokenQuotaTarget(ctx context.Context, tokenId int, taskID string) (key string, skip bool) {
 	token, err := model.GetTokenById(tokenId)
 	if err != nil {
 		logger.LogWarn(ctx, fmt.Sprintf("获取令牌 key 失败 (tokenId=%d, task=%s): %s", tokenId, taskID, err.Error()))
-		return ""
+		return "", false
 	}
-	return token.Key
+	if token.UnlimitedQuota {
+		return "", true
+	}
+	return token.Key, false
 }
 
 // taskIsSubscription 判断任务是否通过订阅计费。
@@ -97,8 +100,8 @@ func taskAdjustTokenQuota(ctx context.Context, task *model.Task, delta int) {
 	if task.PrivateData.TokenId <= 0 || delta == 0 {
 		return
 	}
-	tokenKey := resolveTokenKey(ctx, task.PrivateData.TokenId, task.TaskID)
-	if tokenKey == "" {
+	tokenKey, skip := resolveTokenQuotaTarget(ctx, task.PrivateData.TokenId, task.TaskID)
+	if skip || tokenKey == "" {
 		return
 	}
 	var err error

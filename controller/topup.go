@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"strconv"
 	"sync"
@@ -49,9 +50,9 @@ func GetTopUpInfo(c *gin.Context) {
 	}
 
 	data := gin.H{
-		"enable_online_topup": operation_setting.PayAddress != "" && operation_setting.EpayId != "" && operation_setting.EpayKey != "",
+		"enable_online_topup": IsEpayEnabled(),
 		"enable_stripe_topup": IsStripeTopupEnabled(),
-		"enable_creem_topup":  setting.CreemApiKey != "" && setting.CreemProducts != "[]",
+		"enable_creem_topup":  IsCreemTopupEnabled(),
 		"creem_products":      setting.CreemProducts,
 		"pay_methods":         payMethods,
 		"min_topup":           operation_setting.MinTopUp,
@@ -126,6 +127,10 @@ func getMinTopup() int64 {
 }
 
 func RequestEpay(c *gin.Context) {
+	if !IsEpayEnabled() {
+		c.JSON(200, gin.H{"message": "error", "data": "当前管理员未配置支付信息"})
+		return
+	}
 	var req EpayRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -228,6 +233,10 @@ func UnlockOrder(tradeNo string) {
 }
 
 func EpayNotify(c *gin.Context) {
+	if !IsEpayEnabled() {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
 	var params map[string]string
 
 	if c.Request.Method == "POST" {
@@ -313,6 +322,10 @@ func EpayNotify(c *gin.Context) {
 }
 
 func RequestAmount(c *gin.Context) {
+	if !IsEpayEnabled() {
+		c.JSON(200, gin.H{"message": "error", "data": "当前管理员未配置支付信息"})
+		return
+	}
 	var req AmountRequest
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
