@@ -46,7 +46,19 @@ type StripePayRequest struct {
 type StripeAdaptor struct {
 }
 
+func IsStripeWebhookEnabled() bool {
+	return strings.TrimSpace(setting.StripeApiSecret) != "" && strings.TrimSpace(setting.StripeWebhookSecret) != ""
+}
+
+func IsStripeTopupEnabled() bool {
+	return IsStripeWebhookEnabled() && strings.TrimSpace(setting.StripePriceId) != ""
+}
+
 func (*StripeAdaptor) RequestAmount(c *gin.Context, req *StripePayRequest) {
+	if !IsStripeTopupEnabled() {
+		c.JSON(200, gin.H{"message": "error", "data": "Stripe 支付未启用"})
+		return
+	}
 	if req.Amount < getStripeMinTopup() {
 		c.JSON(200, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", getStripeMinTopup())})
 		return
@@ -66,6 +78,10 @@ func (*StripeAdaptor) RequestAmount(c *gin.Context, req *StripePayRequest) {
 }
 
 func (*StripeAdaptor) RequestPay(c *gin.Context, req *StripePayRequest) {
+	if !IsStripeTopupEnabled() {
+		c.JSON(200, gin.H{"message": "error", "data": "Stripe 支付未启用"})
+		return
+	}
 	if req.PaymentMethod != PaymentMethodStripe {
 		c.JSON(200, gin.H{"message": "error", "data": "不支持的支付渠道"})
 		return
@@ -146,6 +162,11 @@ func RequestStripePay(c *gin.Context) {
 }
 
 func StripeWebhook(c *gin.Context) {
+	if !IsStripeWebhookEnabled() {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
 	payload, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		log.Printf("解析Stripe Webhook参数失败: %v\n", err)
@@ -195,7 +216,7 @@ func sessionCompleted(event stripe.Event) {
 		"currency":     strings.ToUpper(event.GetObjectValue("currency")),
 		"event_type":   string(event.Type),
 	}
-	if err := model.CompleteSubscriptionOrder(referenceId, common.GetJsonString(payload)); err == nil {
+	if err := model.CompleteSubscriptionOrder(referenceId, common.GetJsonString(payload), PaymentMethodStripe); err == nil {
 		return
 	} else if err != nil && !errors.Is(err, model.ErrSubscriptionOrderNotFound) {
 		log.Println("complete subscription order failed:", err.Error(), referenceId)
@@ -239,6 +260,10 @@ func sessionExpired(event stripe.Event) {
 	topUp := model.GetTopUpByTradeNo(referenceId)
 	if topUp == nil {
 		log.Println("充值订单不存在", referenceId)
+		return
+	}
+	if topUp.PaymentMethod != PaymentMethodStripe {
+		log.Println("充值订单支付方式错误", referenceId, topUp.PaymentMethod)
 		return
 	}
 

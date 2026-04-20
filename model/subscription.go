@@ -35,6 +35,7 @@ const (
 var (
 	ErrSubscriptionOrderNotFound      = errors.New("subscription order not found")
 	ErrSubscriptionOrderStatusInvalid = errors.New("subscription order status invalid")
+	ErrSubscriptionOrderMethodInvalid = errors.New("subscription order payment method invalid")
 )
 
 const (
@@ -505,7 +506,7 @@ func CreateUserSubscriptionFromPlanTx(tx *gorm.DB, userId int, plan *Subscriptio
 }
 
 // Complete a subscription order (idempotent). Creates a UserSubscription snapshot from the plan.
-func CompleteSubscriptionOrder(tradeNo string, providerPayload string) error {
+func CompleteSubscriptionOrder(tradeNo string, providerPayload string, expectedMethods ...string) error {
 	if tradeNo == "" {
 		return errors.New("tradeNo is empty")
 	}
@@ -528,6 +529,18 @@ func CompleteSubscriptionOrder(tradeNo string, providerPayload string) error {
 		}
 		if order.Status != common.TopUpStatusPending {
 			return ErrSubscriptionOrderStatusInvalid
+		}
+		if len(expectedMethods) > 0 {
+			matched := false
+			for _, expectedMethod := range expectedMethods {
+				if strings.EqualFold(strings.TrimSpace(expectedMethod), strings.TrimSpace(order.PaymentMethod)) {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				return ErrSubscriptionOrderMethodInvalid
+			}
 		}
 		plan, err := GetSubscriptionPlanById(order.PlanId)
 		if err != nil {
